@@ -113,7 +113,7 @@ export default function ComponentsDemo() {
               <Badge variant="warning">Warning</Badge>
               <Badge variant="danger">Danger</Badge>
               <Badge variant="info">Info</Badge>
-              <Badge variant="outline">Outline</Badge>
+              <Badge variant="secondary">Secondary</Badge>
             </div>
           </CardContent>
         </Card>

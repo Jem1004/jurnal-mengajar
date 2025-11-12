@@ -1,9 +1,18 @@
 import { ReactNode } from 'react'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { SidebarWrapper } from '@/components/layout/sidebar-wrapper'
 
-export default function GuruLayout({ children }: { children: ReactNode }) {
+export default async function GuruLayout({ children }: { children: ReactNode }) {
+  const session = await auth()
+
+  if (!session || !session.user || session.user.role !== 'GURU') {
+    redirect('/login')
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <SidebarWrapper user={session.user}>
       {children}
-    </div>
+    </SidebarWrapper>
   )
 }

@@ -1,9 +1,9 @@
-import NextAuth, { type NextAuthConfig } from "next-auth"
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 
-export const authOptions: NextAuthConfig = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -82,10 +82,11 @@ export const authOptions: NextAuthConfig = {
     signIn: "/login"
   },
   session: {
-    strategy: "jwt"
+    strategy: "jwt" as const
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true
 }
 
-// Export auth helpers for server components and server actions
+// Export handlers for Next.js 13+ App Router
 export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)

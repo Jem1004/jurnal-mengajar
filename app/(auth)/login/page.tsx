@@ -42,71 +42,112 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4 py-8">
-      <Card className="w-full max-w-md animate-in zoom-in duration-300" variant="elevated">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold">Jurnal Mengajar Modern</CardTitle>
-          <p className="text-sm sm:text-base text-gray-600">Silakan login untuk melanjutkan</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="w-full max-w-md">
+      <div className="text-center mb-8">
+        {/* Logo */}
+        <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Jurnal Mengajar
+        </h1>
+        <p className="text-gray-600">
+          Masuk ke akun Anda untuk melanjutkan
+        </p>
+      </div>
+
+      <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <CardContent className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="rounded-lg bg-red-50 p-3 text-red-800 text-sm border border-red-200 animate-in slide-in-from-top duration-300">
-                <div className="flex items-center gap-2">
-                  <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+              <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-red-800 text-sm animate-in slide-in-from-top duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
                   <span>{error}</span>
                 </div>
               </div>
             )}
 
-            <Input
-              label="Username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-              placeholder="Masukkan username"
-              disabled={isLoading}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Username
+                </label>
+                <Input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  autoComplete="username"
+                  placeholder="Masukkan username"
+                  disabled={isLoading}
+                  className="text-base"
+                />
+              </div>
 
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              placeholder="Masukkan password"
-              disabled={isLoading}
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Masukkan password"
+                  disabled={isLoading}
+                  className="text-base"
+                />
+              </div>
+            </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
               isLoading={isLoading}
               disabled={isLoading}
             >
-              {isLoading ? 'Memproses...' : 'Login'}
+              {isLoading ? 'Memproses...' : 'Masuk'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-xs sm:text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
-            <p className="font-medium mb-2">Demo Credentials:</p>
-            <div className="space-y-1">
-              <p>Guru: <code className="bg-white px-2 py-1 rounded text-xs border border-gray-200">guru1 / password123</code></p>
-              <p>Admin: <code className="bg-white px-2 py-1 rounded text-xs border border-gray-200">admin / admin123</code></p>
+          {/* Demo Credentials */}
+          <div className="mt-8 p-4 bg-green-50 rounded-xl border border-green-200">
+            <p className="text-sm font-medium text-green-800 mb-3 text-center">
+              Akun Demo
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Guru:</span>
+                <code className="bg-white px-3 py-1 rounded-md text-xs font-mono border border-green-200 text-green-700">
+                  guru1 / password123
+                </code>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Admin:</span>
+                <code className="bg-white px-3 py-1 rounded-md text-xs font-mono border border-green-200 text-green-700">
+                  admin / admin123
+                </code>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <div className="text-center mt-8">
+        <p className="text-sm text-gray-500">
+          © 2024 Jurnal Mengajar. Modern & Digital.
+        </p>
+      </div>
     </div>
   )
 }

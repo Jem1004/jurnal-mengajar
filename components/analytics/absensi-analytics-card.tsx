@@ -104,17 +104,17 @@ export function AbsensiAnalyticsCard({ data }: AbsensiAnalyticsCardProps) {
                         </p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {student.sakit > 0 && (
-                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                               Sakit: {student.sakit}
                             </Badge>
                           )}
                           {student.izin > 0 && (
-                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 border-green-200">
                               Izin: {student.izin}
                             </Badge>
                           )}
                           {student.alpa > 0 && (
-                            <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                            <Badge variant="secondary" className="text-xs bg-red-50 text-red-700 border-red-200">
                               Alpa: {student.alpa}
                             </Badge>
                           )}

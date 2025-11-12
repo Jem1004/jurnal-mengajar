@@ -139,7 +139,7 @@ export function TindakLanjutCard({ data }: TindakLanjutCardProps) {
                               {item.siswaName}
                             </p>
                             <Badge
-                              variant="outline"
+                              variant="secondary"
                               className={`text-xs ${colors.bg} ${colors.text} ${colors.border}`}
                             >
                               {tagLabels[item.tag]}
