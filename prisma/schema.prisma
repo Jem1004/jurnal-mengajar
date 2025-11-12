@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  GURU
+  ADMIN
+}
+
+enum StatusAbsensi {
+  HADIR
+  SAKIT
+  IZIN
+  ALPA
+}
+
+enum TagSiswa {
+  PERLU_REMEDIAL
+  PERLU_PENGAYAAN
+  MASALAH_PERILAKU
+  RUJUK_BK
+}
+
+// Models
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // hashed with bcrypt
+  nama      String
+  role      Role
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  guruProfile Guru?
+  
+  @@map("users")
+}
+
+model Guru {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  nip       String?  @unique
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jadwal    Jadwal[]
+  jurnal    Jurnal[]
+  
+  @@map("guru")
+}
+
+model Kelas {
+  id        String   @id @default(cuid())
+  nama      String   @unique // "10-A", "11-IPA-1"
+  tingkat   Int      // 10, 11, 12
+  jurusan   String?  // "IPA", "IPS", "Umum"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  siswa     Siswa[]
+  jadwal    Jadwal[]
+  
+  @@map("kelas")
+}
+
+model MataPelajaran {
+  id        String   @id @default(cuid())
+  nama      String   @unique
+  kode      String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  jadwal    Jadwal[]
+  
+  @@map("mata_pelajaran")
+}
+
+model Siswa {
+  id           String   @id @default(cuid())
+  nisn         String   @unique
+  nama         String
+  kelasId      String
+  jenisKelamin String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  kelas     Kelas            @relation(fields: [kelasId], references: [id], onDelete: Cascade)
+  absensi   Absensi[]
+  tagSiswa  TagSiswaRecord[]
+  
+  @@map("siswa")
+}
+
+model Jadwal {
+  id              String   @id @default(cuid())
+  guruId          String
+  kelasId         String
+  mataPelajaranId String
+  hari            Int      // 0=Minggu, 1=Senin, ..., 6=Sabtu
+  jamMulai        String   // "07:30"
+  jamSelesai      String   // "09:00"
+  semester        Int      // 1 atau 2
+  tahunAjaran     String   // "2024/2025"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  guru          Guru          @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  kelas         Kelas         @relation(fields: [kelasId], references: [id], onDelete: Cascade)
+  mataPelajaran MataPelajaran @relation(fields: [mataPelajaranId], references: [id], onDelete: Cascade)
+  jurnal        Jurnal[]
+  
+  @@unique([guruId, kelasId, mataPelajaranId, hari, jamMulai, semester, tahunAjaran])
+  @@map("jadwal")
+}
+
+model Jurnal {
+  id                   String   @id @default(cuid())
+  jadwalId             String
+  guruId               String
+  tanggal              DateTime @db.Date
+  
+  // Detail Pembelajaran
+  tujuanPembelajaran   String   @db.Text
+  kegiatanPembelajaran String   @db.Text
+  asesmen              String?  @db.Text
+  
+  // Catatan & Tindak Lanjut
+  catatanKhusus        String?  @db.Text
+  linkBukti            String?  // URL to Google Drive, etc.
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Relations
+  jadwal   Jadwal           @relation(fields: [jadwalId], references: [id], onDelete: Cascade)
+  guru     Guru             @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  absensi  Absensi[]
+  tagSiswa TagSiswaRecord[]
+  
+  @@unique([jadwalId, tanggal])
+  @@index([guruId, tanggal])
+  @@map("jurnal")
+}
+
+model Absensi {
+  id        String        @id @default(cuid())
+  jurnalId  String
+  siswaId   String
+  status    StatusAbsensi @default(HADIR)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  // Relations
+  jurnal Jurnal @relation(fields: [jurnalId], references: [id], onDelete: Cascade)
+  siswa  Siswa  @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  
+  @@unique([jurnalId, siswaId])
+  @@index([siswaId, status])
+  @@map("absensi")
+}
+
+model TagSiswaRecord {
+  id              String   @id @default(cuid())
+  jurnalId        String
+  siswaId         String
+  tag             TagSiswa
+  keterangan      String?  @db.Text
+  ditindaklanjuti Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  jurnal Jurnal @relation(fields: [jurnalId], references: [id], onDelete: Cascade)
+  siswa  Siswa  @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  
+  @@index([siswaId, tag, ditindaklanjuti])
+  @@map("tag_siswa_record")
+}
