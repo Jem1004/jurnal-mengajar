@@ -19,11 +19,13 @@ import {
   deleteJadwal,
   createJadwal,
   updateJadwal,
+  getJadwalPaginated,
   getGuru,
   getKelas,
   getMataPelajaran
 } from '@/app/actions/master'
 import { Calendar, Clock, MapPin, User, Edit, Plus, AlertTriangle, BookOpen, Building } from 'lucide-react'
+import Pagination from '@/components/ui/pagination'
 
 interface Jadwal {
   id: string
@@ -83,6 +85,13 @@ export default function ManagementJadwalPage() {
   const [filterKelasId, setFilterKelasId] = useState<string>('')
   const [filterHari, setFilterHari] = useState<string>('')
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage] = useState(10)
+  const [searchTerm, setSearchTerm] = useState('')
+
   useEffect(() => {
     loadData()
   }, [])
@@ -105,34 +114,50 @@ export default function ManagementJadwalPage() {
 
   const loadData = async () => {
     setLoading(true)
-    
+
     const [jadwalResult, guruResult, kelasResult, mataPelajaranResult] = await Promise.all([
-      getJadwal(),
+      getJadwalPaginated(currentPage, itemsPerPage, searchTerm),
       getGuru(),
       getKelas(),
       getMataPelajaran()
     ])
-    
+
     if (jadwalResult.success && jadwalResult.data) {
       setJadwalList(jadwalResult.data)
       setFilteredJadwalList(jadwalResult.data)
+      setTotalPages(jadwalResult.pagination.totalPages)
+      setTotalItems(jadwalResult.pagination.total)
     } else {
       setError(jadwalResult.error || 'Failed to load jadwal')
     }
-    
+
     if (guruResult.success && guruResult.data) {
       setGuruList(guruResult.data)
     }
-    
+
     if (kelasResult.success && kelasResult.data) {
       setKelasList(kelasResult.data)
     }
-    
+
     if (mataPelajaranResult.success && mataPelajaranResult.data) {
       setMataPelajaranList(mataPelajaranResult.data)
     }
-    
+
     setLoading(false)
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [currentPage, searchTerm])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCurrentPage(1)
+    loadData()
   }
 
   
@@ -537,6 +562,50 @@ export default function ManagementJadwalPage() {
           </div>
         </div>
       )}
+
+      {/* Search Section */}
+      <div className="bg-white rounded-xl shadow-custom-sm border border-gray-200 p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Cari Jadwal
+            </label>
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari mata pelajaran, kelas, guru, atau ruang..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+              />
+              <Button type="submit" variant="outline" size="sm" className="px-4 py-2">
+                Cari
+              </Button>
+            </form>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-600">
+              <span className="font-semibold">{filteredJadwalList.length}</span> dari {totalItems} jadwal
+            </div>
+            {searchTerm && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('')
+                  setCurrentPage(1)
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Advanced Filter Section */}
       <div className="bg-white rounded-xl shadow-custom-sm border border-gray-200 p-6">
@@ -975,6 +1044,17 @@ export default function ManagementJadwalPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!loading && filteredJadwalList.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          )}
         </div>
       )}
 

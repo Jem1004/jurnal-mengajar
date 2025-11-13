@@ -74,6 +74,23 @@ export interface UpdateJadwalDTO {
   tahunAjaran?: string
 }
 
+// Pagination interfaces
+export interface PaginationParams {
+  page?: number
+  limit?: number
+  search?: string
+}
+
+export interface PaginatedResult<T> {
+  data: T[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
 export class MasterService {
   // ==================== GURU METHODS ====================
   
@@ -311,7 +328,7 @@ export class MasterService {
   }
 
   // ==================== MATA PELAJARAN METHODS ====================
-  
+
   async getMataPelajaran() {
     try {
       return await prisma.mataPelajaran.findMany({
@@ -319,6 +336,44 @@ export class MasterService {
           nama: 'asc'
         }
       })
+    } catch (error) {
+      throw new Error(`Failed to fetch mata pelajaran: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  async getMataPelajaranPaginated(params: PaginationParams = {}) {
+    try {
+      const { page = 1, limit = 10, search } = params
+      const skip = (page - 1) * limit
+
+      const where = search ? {
+        OR: [
+          { nama: { contains: search, mode: 'insensitive' as const } },
+          { kode: { contains: search, mode: 'insensitive' as const } }
+        ]
+      } : {}
+
+      const [data, total] = await Promise.all([
+        prisma.mataPelajaran.findMany({
+          where,
+          orderBy: {
+            nama: 'asc'
+          },
+          skip,
+          take: limit
+        }),
+        prisma.mataPelajaran.count({ where })
+      ])
+
+      return {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
     } catch (error) {
       throw new Error(`Failed to fetch mata pelajaran: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -390,7 +445,7 @@ export class MasterService {
   }
 
   // ==================== SISWA METHODS ====================
-  
+
   async getSiswa() {
     try {
       return await prisma.siswa.findMany({
@@ -401,6 +456,47 @@ export class MasterService {
           nama: 'asc'
         }
       })
+    } catch (error) {
+      throw new Error(`Failed to fetch siswa: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  async getSiswaPaginated(params: PaginationParams = {}) {
+    try {
+      const { page = 1, limit = 10, search } = params
+      const skip = (page - 1) * limit
+
+      const where = search ? {
+        OR: [
+          { nama: { contains: search, mode: 'insensitive' as const } },
+          { nisn: { contains: search, mode: 'insensitive' as const } }
+        ]
+      } : {}
+
+      const [data, total] = await Promise.all([
+        prisma.siswa.findMany({
+          where,
+          include: {
+            kelas: true
+          },
+          orderBy: {
+            nama: 'asc'
+          },
+          skip,
+          take: limit
+        }),
+        prisma.siswa.count({ where })
+      ])
+
+      return {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
     } catch (error) {
       throw new Error(`Failed to fetch siswa: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -503,7 +599,7 @@ export class MasterService {
   }
 
   // ==================== JADWAL METHODS ====================
-  
+
   async getJadwal() {
     try {
       return await prisma.jadwal.findMany({
@@ -525,6 +621,60 @@ export class MasterService {
           { jamMulai: 'asc' }
         ]
       })
+    } catch (error) {
+      throw new Error(`Failed to fetch jadwal: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  async getJadwalPaginated(params: PaginationParams = {}) {
+    try {
+      const { page = 1, limit = 10, search } = params
+      const skip = (page - 1) * limit
+
+      const where = search ? {
+        OR: [
+          { mataPelajaran: { nama: { contains: search, mode: 'insensitive' as const } } },
+          { kelas: { nama: { contains: search, mode: 'insensitive' as const } } },
+          { guru: { user: { nama: { contains: search, mode: 'insensitive' as const } } } },
+          { ruang: { contains: search, mode: 'insensitive' as const } }
+        ]
+      } : {}
+
+      const [data, total] = await Promise.all([
+        prisma.jadwal.findMany({
+          where,
+          include: {
+            guru: {
+              include: {
+                user: {
+                  select: {
+                    nama: true
+                  }
+                }
+              }
+            },
+            kelas: true,
+            mataPelajaran: true
+          },
+          orderBy: [
+            { hari: 'asc' },
+            { jamMulai: 'asc' }
+          ],
+          skip,
+          take: limit
+        }),
+        prisma.jadwal.count({ where })
+      ])
+
+      return {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
     } catch (error) {
       throw new Error(`Failed to fetch jadwal: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -562,7 +712,7 @@ export class MasterService {
   async getJadwalByGuruAndDate(guruId: string, date: Date) {
     try {
       const dayOfWeek = date.getDay()
-      
+
       return await prisma.jadwal.findMany({
         where: {
           guruId,
@@ -583,6 +733,35 @@ export class MasterService {
       })
     } catch (error) {
       throw new Error(`Failed to fetch jadwal by guru and date: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  async getJadwalByGuru(guruId: string) {
+    try {
+      return await prisma.jadwal.findMany({
+        where: {
+          guruId
+        },
+        include: {
+          kelas: true,
+          mataPelajaran: true,
+          guru: {
+            include: {
+              user: {
+                select: {
+                  nama: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: [
+          { hari: 'asc' },
+          { jamMulai: 'asc' }
+        ]
+      })
+    } catch (error) {
+      throw new Error(`Failed to fetch jadwal by guru: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

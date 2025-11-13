@@ -14,8 +14,9 @@ import {
 } from '@/components/ui/dialog'
 import Link from 'next/link'
 import Select from '@/components/ui/select'
-import { getSiswa, deleteSiswa, createSiswa, updateSiswa, getKelas } from '@/app/actions/master'
+import { getSiswa, deleteSiswa, createSiswa, updateSiswa, getSiswaPaginated, getKelas } from '@/app/actions/master'
 import { User, Edit, Plus, AlertTriangle, Hash, Users, Building, UserCircle } from 'lucide-react'
+import Pagination from '@/components/ui/pagination'
 
 interface Siswa {
   id: string
@@ -47,6 +48,13 @@ export default function ManagementSiswaPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [filterKelasId, setFilterKelasId] = useState<string>('')
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage] = useState(10)
+  const [searchTerm, setSearchTerm] = useState('')
+
   useEffect(() => {
     loadData()
   }, [])
@@ -61,24 +69,40 @@ export default function ManagementSiswaPage() {
 
   const loadData = async () => {
     setLoading(true)
-    
+
     const [siswaResult, kelasResult] = await Promise.all([
-      getSiswa(),
+      getSiswaPaginated(currentPage, itemsPerPage, searchTerm),
       getKelas()
     ])
-    
+
     if (siswaResult.success && siswaResult.data) {
       setSiswaList(siswaResult.data)
       setFilteredSiswaList(siswaResult.data)
+      setTotalPages(siswaResult.pagination.totalPages)
+      setTotalItems(siswaResult.pagination.total)
     } else {
       setError(siswaResult.error || 'Failed to load siswa')
     }
-    
+
     if (kelasResult.success && kelasResult.data) {
       setKelasList(kelasResult.data)
     }
-    
+
     setLoading(false)
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [currentPage, searchTerm])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCurrentPage(1)
+    loadData()
   }
 
   
@@ -376,7 +400,7 @@ export default function ManagementSiswaPage() {
 
       {/* Filter Section */}
       <div className="bg-white rounded-xl shadow-custom-sm border border-gray-200 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex-1">
             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
               <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -394,15 +418,39 @@ export default function ManagementSiswaPage() {
               ]}
             />
           </div>
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Cari Siswa
+            </label>
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari nama atau NISN..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+              />
+              <Button type="submit" variant="outline" size="sm" className="px-4 py-2">
+                Cari
+              </Button>
+            </form>
+          </div>
           <div className="flex items-center gap-3">
             <div className="text-sm text-gray-600">
-              <span className="font-semibold">{filteredSiswaList.length}</span> dari {siswaList.length} siswa
+              <span className="font-semibold">{filteredSiswaList.length}</span> dari {totalItems} siswa
             </div>
-            {filterKelasId && (
+            {(filterKelasId || searchTerm) && (
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => setFilterKelasId('')}
+                onClick={() => {
+                  setFilterKelasId('')
+                  setSearchTerm('')
+                  setCurrentPage(1)
+                }}
                 className="text-xs px-3 py-1.5 rounded-lg"
               >
                 Reset
@@ -690,6 +738,17 @@ export default function ManagementSiswaPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!loading && filteredSiswaList.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          )}
         </div>
       )}
 

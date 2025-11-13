@@ -368,12 +368,34 @@ export async function getMataPelajaran() {
     if (!session || !session.user) {
       throw new Error('Unauthorized: Please login')
     }
-    
+
     const mataPelajaranList = await masterService.getMataPelajaran()
-    
+
     return {
       success: true,
       data: mataPelajaranList
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch mata pelajaran'
+    }
+  }
+}
+
+export async function getMataPelajaranPaginated(page: number = 1, limit: number = 10, search?: string) {
+  try {
+    // Mata pelajaran can be accessed by both admin and guru
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error('Unauthorized: Please login')
+    }
+
+    const result = await masterService.getMataPelajaranPaginated({ page, limit, search })
+
+    return {
+      success: true,
+      ...result
     }
   } catch (error) {
     return {
@@ -499,12 +521,34 @@ export async function getSiswa() {
     if (!session || !session.user) {
       throw new Error('Unauthorized: Please login')
     }
-    
+
     const siswaList = await masterService.getSiswa()
-    
+
     return {
       success: true,
       data: siswaList
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch siswa'
+    }
+  }
+}
+
+export async function getSiswaPaginated(page: number = 1, limit: number = 10, search?: string) {
+  try {
+    // Siswa can be accessed by both admin and guru
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error('Unauthorized: Please login')
+    }
+
+    const result = await masterService.getSiswaPaginated({ page, limit, search })
+
+    return {
+      success: true,
+      ...result
     }
   } catch (error) {
     return {
@@ -658,12 +702,33 @@ export async function getJadwal() {
     if (!session || !session.user) {
       throw new Error('Unauthorized: Please login')
     }
-    
+
     const jadwalList = await masterService.getJadwal()
-    
+
     return {
       success: true,
       data: jadwalList
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch jadwal'
+    }
+  }
+}
+
+export async function getJadwalPaginated(page: number = 1, limit: number = 10, search?: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error('Unauthorized: Please login')
+    }
+
+    const result = await masterService.getJadwalPaginated({ page, limit, search })
+
+    return {
+      success: true,
+      ...result
     }
   } catch (error) {
     return {

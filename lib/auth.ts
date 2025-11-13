@@ -82,7 +82,8 @@ export const authOptions = {
     signIn: "/login"
   },
   session: {
-    strategy: "jwt" as const
+    strategy: "jwt" as const,
+    maxAge: parseInt(process.env.SESSION_MAX_AGE || "1800", 10) // 30 minutes default
   },
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true

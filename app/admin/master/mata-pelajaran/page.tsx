@@ -13,8 +13,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import Link from 'next/link'
-import { getMataPelajaran, deleteMataPelajaran, createMataPelajaran, updateMataPelajaran } from '@/app/actions/master'
+import { getMataPelajaran, deleteMataPelajaran, createMataPelajaran, updateMataPelajaran, getMataPelajaranPaginated } from '@/app/actions/master'
 import { BookOpen, Edit, Plus, AlertTriangle, Hash } from 'lucide-react'
+import Pagination from '@/components/ui/pagination'
 
 interface MataPelajaran {
   id: string
@@ -28,19 +29,42 @@ export default function ManagementMataPelajaranPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage] = useState(10)
+  const [searchTerm, setSearchTerm] = useState('')
+
   useEffect(() => {
     loadMataPelajaran()
   }, [])
 
   const loadMataPelajaran = async () => {
     setLoading(true)
-    const result = await getMataPelajaran()
+    const result = await getMataPelajaranPaginated(currentPage, itemsPerPage, searchTerm)
     if (result.success && result.data) {
       setMataPelajaranList(result.data)
+      setTotalPages(result.pagination.totalPages)
+      setTotalItems(result.pagination.total)
     } else {
       setError(result.error || 'Failed to load mata pelajaran')
     }
     setLoading(false)
+  }
+
+  useEffect(() => {
+    loadMataPelajaran()
+  }, [currentPage, searchTerm])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCurrentPage(1)
+    loadMataPelajaran()
   }
 
   
@@ -289,6 +313,50 @@ export default function ManagementMataPelajaranPage() {
         </div>
       )}
 
+      {/* Search Section */}
+      <div className="bg-white rounded-xl shadow-custom-sm border border-gray-200 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Cari Mata Pelajaran
+            </label>
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari nama atau kode mata pelajaran..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+              />
+              <Button type="submit" variant="outline" size="sm" className="px-4 py-2">
+                Cari
+              </Button>
+            </form>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-600">
+              <span className="font-semibold">{mataPelajaranList.length}</span> dari {totalItems} mata pelajaran
+            </div>
+            {searchTerm && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('')
+                  setCurrentPage(1)
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Loading State */}
       {loading ? (
         <div className="text-center py-16">
@@ -475,6 +543,17 @@ export default function ManagementMataPelajaranPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!loading && mataPelajaranList.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          )}
         </div>
       )}
 

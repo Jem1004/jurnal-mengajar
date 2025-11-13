@@ -18,10 +18,7 @@ export const metadata: Metadata = {
   description: "Aplikasi digital modern untuk jurnal mengajar dan monitoring pembelajaran",
   keywords: ["jurnal mengajar", "pendidikan", "monitoring pembelajaran", "digital"],
   authors: [{ name: "Education Team" }],
-  icons: {
-    icon: '/favicon.ico',
-  }
-};
+  };
 
 export default function RootLayout({
   children,
