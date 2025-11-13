@@ -20,6 +20,10 @@ export interface CreateJurnalDTO {
   tujuanPembelajaran: string
   kegiatanPembelajaran: string
   asesmen?: string
+  statusKetercapaianTP?: string
+  catatanRefleksi?: string
+  hambatan?: string
+  solusi?: string
   catatanKhusus?: string
   linkBukti?: string
   absensi: AbsensiInput[]
@@ -30,6 +34,10 @@ export interface UpdateJurnalDTO {
   tujuanPembelajaran?: string
   kegiatanPembelajaran?: string
   asesmen?: string
+  statusKetercapaianTP?: string
+  catatanRefleksi?: string
+  hambatan?: string
+  solusi?: string
   catatanKhusus?: string
   linkBukti?: string
   absensi?: AbsensiInput[]
@@ -95,6 +103,10 @@ export class JurnalService {
             tujuanPembelajaran: data.tujuanPembelajaran,
             kegiatanPembelajaran: data.kegiatanPembelajaran,
             asesmen: data.asesmen,
+            statusKetercapaianTP: data.statusKetercapaianTP as any,
+            catatanRefleksi: data.catatanRefleksi,
+            hambatan: data.hambatan,
+            solusi: data.solusi,
             catatanKhusus: data.catatanKhusus,
             linkBukti: data.linkBukti
           }

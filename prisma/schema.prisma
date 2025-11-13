@@ -30,6 +30,12 @@ enum TagSiswa {
   RUJUK_BK
 }
 
+enum StatusKetercapaianTP {
+  TERCAPAI
+  SEBAGIAN_TERCAPAI
+  TIDAK_TERCAPAI
+}
+
 // Models
 model User {
   id        String   @id @default(cuid())
@@ -139,6 +145,12 @@ model Jurnal {
   kegiatanPembelajaran String   @db.Text
   asesmen              String?  @db.Text
   
+  // Status Ketercapaian & Refleksi
+  statusKetercapaianTP StatusKetercapaianTP? @default(TERCAPAI)
+  catatanRefleksi      String?  @db.Text // Refleksi guru tentang pembelajaran
+  hambatan             String?  @db.Text // Hambatan yang dihadapi
+  solusi               String?  @db.Text // Solusi yang diterapkan
+  
   // Catatan & Tindak Lanjut
   catatanKhusus        String?  @db.Text
   linkBukti            String?  // URL to Google Drive, etc.
@@ -154,6 +166,7 @@ model Jurnal {
   
   @@unique([jadwalId, tanggal])
   @@index([guruId, tanggal])
+  @@index([statusKetercapaianTP])
   @@map("jurnal")
 }
 

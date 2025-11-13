@@ -238,15 +238,21 @@ export default async function AdminDashboardPage() {
         </Link>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity with Tujuan Pembelajaran */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Aktivitas Terbaru
+            Jurnal Terbaru
           </CardTitle>
+          <Link
+            href="/admin/jurnal"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Lihat Semua →
+          </Link>
         </CardHeader>
         <CardContent>
           {recentJurnal.length === 0 ? (
@@ -256,38 +262,75 @@ export default async function AdminDashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada aktivitas</h3>
-              <p className="text-gray-500">Belum ada jurnal yang diisi hari ini</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada jurnal</h3>
+              <p className="text-gray-500">Belum ada jurnal yang diisi</p>
             </div>
           ) : (
             <div className="space-y-4">
               {recentJurnal.map((jurnal) => (
-                <div key={jurnal.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
+                <div key={jurnal.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div>
                         <p className="font-medium text-gray-900">{jurnal.guru.user.nama}</p>
                         <p className="text-sm text-gray-600">
                           {jurnal.jadwal.mataPelajaran.nama} • {jurnal.jadwal.kelas.nama}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(jurnal.tanggal).toLocaleDateString('id-ID', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge
+                        variant={
+                          jurnal.statusKetercapaianTP === 'TERCAPAI'
+                            ? 'success'
+                            : jurnal.statusKetercapaianTP === 'SEBAGIAN_TERCAPAI'
+                            ? 'warning'
+                            : 'danger'
+                        }
+                        size="sm"
+                        className="flex-shrink-0"
+                      >
+                        {jurnal.statusKetercapaianTP === 'TERCAPAI'
+                          ? 'Tercapai'
+                          : jurnal.statusKetercapaianTP === 'SEBAGIAN_TERCAPAI'
+                          ? 'Sebagian'
+                          : 'Tidak Tercapai'}
+                      </Badge>
+                      <p className="text-xs text-gray-500">
+                        {new Date(jurnal.tanggal).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pl-13">
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                        Tujuan Pembelajaran:
+                      </p>
+                      <p className="text-sm text-gray-700 line-clamp-2">
+                        {jurnal.tujuanPembelajaran}
+                      </p>
+                    </div>
+                    
+                    {jurnal.catatanRefleksi && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                          Refleksi:
+                        </p>
+                        <p className="text-sm text-gray-600 line-clamp-1 italic">
+                          {jurnal.catatanRefleksi}
                         </p>
                       </div>
-                      <Badge variant="success" size="sm" className="flex-shrink-0">
-                        Terisi
-                      </Badge>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))}

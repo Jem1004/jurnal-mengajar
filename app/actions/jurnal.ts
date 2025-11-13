@@ -6,6 +6,7 @@ import { jurnalService } from '@/lib/services/jurnal.service'
 import { masterService } from '@/lib/services/master.service'
 import { StatusAbsensi, TagSiswa } from '@prisma/client'
 import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 // ==================== VALIDATION SCHEMAS ====================
 
@@ -26,6 +27,10 @@ const CreateJurnalSchema = z.object({
   tujuanPembelajaran: z.string().min(1, 'Tujuan Pembelajaran is required'),
   kegiatanPembelajaran: z.string().min(1, 'Kegiatan Pembelajaran is required'),
   asesmen: z.string().optional(),
+  statusKetercapaianTP: z.string().optional(),
+  catatanRefleksi: z.string().optional(),
+  hambatan: z.string().optional(),
+  solusi: z.string().optional(),
   catatanKhusus: z.string().optional(),
   linkBukti: z.string().url('Invalid URL format').optional().or(z.literal('')),
   absensi: z.array(AbsensiInputSchema),
@@ -102,6 +107,10 @@ export async function createJurnal(formData: FormData) {
       tujuanPembelajaran: formData.get('tujuanPembelajaran') as string,
       kegiatanPembelajaran: formData.get('kegiatanPembelajaran') as string,
       asesmen: formData.get('asesmen') as string || undefined,
+      statusKetercapaianTP: formData.get('statusKetercapaianTP') as string || 'TERCAPAI',
+      catatanRefleksi: formData.get('catatanRefleksi') as string || undefined,
+      hambatan: formData.get('hambatan') as string || undefined,
+      solusi: formData.get('solusi') as string || undefined,
       catatanKhusus: formData.get('catatanKhusus') as string || undefined,
       linkBukti: formData.get('linkBukti') as string || undefined,
       absensi: JSON.parse(formData.get('absensi') as string || '[]'),
@@ -122,6 +131,10 @@ export async function createJurnal(formData: FormData) {
       tujuanPembelajaran: validatedData.tujuanPembelajaran,
       kegiatanPembelajaran: validatedData.kegiatanPembelajaran,
       asesmen: validatedData.asesmen,
+      statusKetercapaianTP: validatedData.statusKetercapaianTP as any,
+      catatanRefleksi: validatedData.catatanRefleksi,
+      hambatan: validatedData.hambatan,
+      solusi: validatedData.solusi,
       catatanKhusus: validatedData.catatanKhusus,
       linkBukti: validatedData.linkBukti || undefined,
       absensi: validatedData.absensi,
@@ -347,5 +360,42 @@ export async function getAbsensiSummary(jurnalId: string) {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get absensi summary'
     }
+  }
+}
+
+
+/**
+ * Get Riwayat Tujuan Pembelajaran
+ * Untuk halaman refleksi guru
+ */
+export async function getRiwayatTP() {
+  try {
+    const user = await getAuthenticatedUser()
+    
+    if (!user.guruId) {
+      return { success: false, error: 'Guru ID not found' }
+    }
+
+    const jurnal = await prisma.jurnal.findMany({
+      where: {
+        guruId: user.guruId,
+      },
+      include: {
+        jadwal: {
+          include: {
+            kelas: true,
+            mataPelajaran: true,
+          },
+        },
+      },
+      orderBy: {
+        tanggal: 'desc',
+      },
+    })
+
+    return { success: true, data: jurnal }
+  } catch (error) {
+    console.error('Error fetching riwayat TP:', error)
+    return { success: false, error: 'Failed to fetch riwayat TP' }
   }
 }

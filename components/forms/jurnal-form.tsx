@@ -56,6 +56,12 @@ export default function JurnalForm({ jadwal, siswaList, tanggal }: JurnalFormPro
   const [catatanKhusus, setCatatanKhusus] = useState('')
   const [linkBukti, setLinkBukti] = useState('')
   
+  // Refleksi dan Ketercapaian TP
+  const [statusKetercapaianTP, setStatusKetercapaianTP] = useState('TERCAPAI')
+  const [catatanRefleksi, setCatatanRefleksi] = useState('')
+  const [hambatan, setHambatan] = useState('')
+  const [solusi, setSolusi] = useState('')
+  
   // Initialize absensi with all students as HADIR
   const [absensi, setAbsensi] = useState<AbsensiState[]>(
     siswaList.map(siswa => ({
@@ -125,6 +131,21 @@ export default function JurnalForm({ jadwal, siswaList, tanggal }: JurnalFormPro
       
       if (linkBukti.trim()) {
         formData.append('linkBukti', linkBukti)
+      }
+      
+      // Refleksi dan Ketercapaian TP
+      formData.append('statusKetercapaianTP', statusKetercapaianTP)
+      
+      if (catatanRefleksi.trim()) {
+        formData.append('catatanRefleksi', catatanRefleksi)
+      }
+      
+      if (hambatan.trim()) {
+        formData.append('hambatan', hambatan)
+      }
+      
+      if (solusi.trim()) {
+        formData.append('solusi', solusi)
       }
       
       formData.append('absensi', JSON.stringify(absensi))
@@ -264,7 +285,165 @@ export default function JurnalForm({ jadwal, siswaList, tanggal }: JurnalFormPro
         </CardContent>
       </Card>
 
-      {/* Section 2: Absensi Siswa */}
+      {/* Section 2: Refleksi & Ketercapaian TP */}
+      <Card className="shadow-xl border border-slate-200 animate-in fade-in duration-300 overflow-hidden" style={{ animationDelay: '100ms' }}>
+        <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div>
+              <CardTitle className="text-xl font-bold text-slate-900">Refleksi & Ketercapaian TP</CardTitle>
+              <p className="text-sm text-slate-600 mt-1">Evaluasi pencapaian tujuan pembelajaran dan refleksi</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              Status Ketercapaian Tujuan Pembelajaran
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setStatusKetercapaianTP('TERCAPAI')}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  statusKetercapaianTP === 'TERCAPAI'
+                    ? 'border-green-500 bg-green-50 shadow-md'
+                    : 'border-gray-200 hover:border-green-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    statusKetercapaianTP === 'TERCAPAI'
+                      ? 'border-green-500 bg-green-500'
+                      : 'border-gray-300'
+                  }`}>
+                    {statusKetercapaianTP === 'TERCAPAI' && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm text-gray-900">Tercapai</div>
+                    <div className="text-xs text-gray-500">TP tercapai sepenuhnya</div>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusKetercapaianTP('SEBAGIAN_TERCAPAI')}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  statusKetercapaianTP === 'SEBAGIAN_TERCAPAI'
+                    ? 'border-yellow-500 bg-yellow-50 shadow-md'
+                    : 'border-gray-200 hover:border-yellow-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    statusKetercapaianTP === 'SEBAGIAN_TERCAPAI'
+                      ? 'border-yellow-500 bg-yellow-500'
+                      : 'border-gray-300'
+                  }`}>
+                    {statusKetercapaianTP === 'SEBAGIAN_TERCAPAI' && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm text-gray-900">Sebagian</div>
+                    <div className="text-xs text-gray-500">TP tercapai sebagian</div>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusKetercapaianTP('TIDAK_TERCAPAI')}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  statusKetercapaianTP === 'TIDAK_TERCAPAI'
+                    ? 'border-red-500 bg-red-50 shadow-md'
+                    : 'border-gray-200 hover:border-red-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    statusKetercapaianTP === 'TIDAK_TERCAPAI'
+                      ? 'border-red-500 bg-red-500'
+                      : 'border-gray-300'
+                  }`}>
+                    {statusKetercapaianTP === 'TIDAK_TERCAPAI' && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm text-gray-900">Tidak Tercapai</div>
+                    <div className="text-xs text-gray-500">TP belum tercapai</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              Catatan Refleksi
+              <span className="text-slate-400 text-xs ml-1">(Opsional)</span>
+            </label>
+            <Textarea
+              placeholder="Refleksikan proses pembelajaran: Apa yang berjalan baik? Apa yang perlu diperbaiki?"
+              value={catatanRefleksi}
+              onChange={(e) => setCatatanRefleksi(e.target.value)}
+              rows={3}
+              className="resize-none border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                Hambatan
+                <span className="text-slate-400 text-xs ml-1">(Opsional)</span>
+              </label>
+              <Textarea
+                placeholder="Hambatan yang dihadapi selama pembelajaran..."
+                value={hambatan}
+                onChange={(e) => setHambatan(e.target.value)}
+                rows={3}
+                className="resize-none border-slate-200 focus:border-red-500 focus:ring-red-500/20"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Solusi
+                <span className="text-slate-400 text-xs ml-1">(Opsional)</span>
+              </label>
+              <Textarea
+                placeholder="Solusi yang diterapkan atau akan diterapkan..."
+                value={solusi}
+                onChange={(e) => setSolusi(e.target.value)}
+                rows={3}
+                className="resize-none border-slate-200 focus:border-green-500 focus:ring-green-500/20"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 3: Absensi Siswa */}
       <Card className="shadow-xl border border-slate-200 animate-in fade-in duration-300 overflow-hidden" style={{ animationDelay: '100ms' }}>
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
           <div className="flex items-center justify-between">

@@ -25,6 +25,17 @@ export const tagSiswaSchema = z.enum([
 });
 
 /**
+ * Status Ketercapaian TP enum validation
+ */
+export const statusKetercapaianTPSchema = z.enum([
+  'TERCAPAI',
+  'SEBAGIAN_TERCAPAI',
+  'TIDAK_TERCAPAI',
+], {
+  errorMap: () => ({ message: 'Status ketercapaian TP tidak valid' }),
+});
+
+/**
  * Absensi record validation
  * Validates individual student attendance record
  */
@@ -89,6 +100,27 @@ export const createJurnalSchema = z.object({
     .optional()
     .or(z.literal('')),
   
+  // Status Ketercapaian & Refleksi
+  statusKetercapaianTP: statusKetercapaianTPSchema.optional().default('TERCAPAI'),
+  
+  catatanRefleksi: z.string()
+    .max(2000, 'Catatan Refleksi maksimal 2000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
+  hambatan: z.string()
+    .max(1000, 'Hambatan maksimal 1000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
+  solusi: z.string()
+    .max(1000, 'Solusi maksimal 1000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
   // Absensi - Requirements 6.1-6.5
   absensi: z.array(absensiRecordSchema)
     .min(1, 'Minimal harus ada 1 data absensi')
@@ -134,6 +166,26 @@ export const updateJurnalSchema = z.object({
   
   asesmen: z.string()
     .max(2000, 'Asesmen maksimal 2000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
+  statusKetercapaianTP: statusKetercapaianTPSchema.optional(),
+  
+  catatanRefleksi: z.string()
+    .max(2000, 'Catatan Refleksi maksimal 2000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
+  hambatan: z.string()
+    .max(1000, 'Hambatan maksimal 1000 karakter')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  
+  solusi: z.string()
+    .max(1000, 'Solusi maksimal 1000 karakter')
     .trim()
     .optional()
     .or(z.literal('')),

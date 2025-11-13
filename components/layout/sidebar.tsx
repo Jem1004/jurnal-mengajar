@@ -65,6 +65,18 @@ export function Sidebar({ user, children }: SidebarProps) {
   const navItems = isAdmin
     ? [
         { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/admin/jurnal", label: "Monitor Jurnal", icon: BookOpen },
+        {
+          href: "#",
+          label: "Laporan",
+          icon: FileText,
+          isDropdown: true,
+          dropdownItems: [
+            { href: "/admin/laporan/keterisian", label: "Keterisian Jurnal", icon: FileText },
+            { href: "/admin/laporan/absensi", label: "Agregat Absensi", icon: BarChart3 },
+            { href: "/admin/laporan/tujuan-pembelajaran", label: "Tujuan Pembelajaran", icon: School },
+          ]
+        },
         {
           href: "#",
           label: "Data Master",
@@ -78,11 +90,12 @@ export function Sidebar({ user, children }: SidebarProps) {
             { href: "/admin/master/jadwal", label: "Jadwal", icon: Calendar },
           ]
         },
-        { href: "/admin/laporan/keterisian", label: "Laporan", icon: FileText },
       ]
     : [
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/jurnal", label: "Jurnal", icon: BookOpen },
+        { href: "/refleksi", label: "Refleksi", icon: School },
+        { href: "/riwayat-tp", label: "Riwayat TP", icon: FileText },
         { href: "/analitik", label: "Analitik", icon: BarChart3 },
       ]
 
